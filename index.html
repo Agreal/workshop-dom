@@ -9,15 +9,15 @@
 </head>
 
 <body>
-  <section>
+  <section class="hide">
     <h2>BUTTONS</h2>
 
     <h3>button</h3>
     <p>
-      <button class="btn btn-default">button</button>
-      <button class="btn btn-primary">button</button>
-      <button class="btn btn-success">button</button>
-      <button class="btn btn-link">button</button>
+      <button class="btn btn-default" type="button">button</button>
+      <button class="btn btn-primary" type="button">button</button>
+      <button class="btn btn-success" type="button">button</button>
+      <button class="btn btn-link" type="button">button</button>
     </p>
 
     <h3>input</h3>
@@ -37,7 +37,7 @@
     </p>
   </section>
 
-  <section>
+  <section class="hide">
     <h2>DROPDOWN</h2>
     <div class="dropdown">
       <button class="dropdown-label btn btn-default">
@@ -52,10 +52,22 @@
     </div>
   </section>
 
-  <!--<section>-->
-    <!--<h2>TAB</h2>-->
-    <!--<div></div>-->
-  <!--</section>-->
+  <section>
+    <h2>Add Resource</h2>
+    <div class="agent-item">
+      <button class="btn btn-primary add-resource">+</button>
+      <ul class="resources">
+        <li class="resource-item">Firefox<span class="delete">X</span></li>
+        <li class="resource-item">Chrome<span class="delete">X</span></li>
+        <li class="resource-item">Chrome<span class="delete">X</span></li>
+      </ul>
+      <div class="add-resource-dialog hide">
+        <input class="resource-input" type="text" value="aaa,bbb">
+        <button class="btn btn-primary add" type="button">Add</button>
+        <button class="btn btn-default cancel" type="button">Cancel</button>
+      </div>
+    </div>
+  </section>
 
   <script src="script/main.js"></script>
 </body>
