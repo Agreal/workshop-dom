@@ -2,36 +2,28 @@
   document.addEventListener('DOMContentLoaded', ready);
 
   function ready() {
+    var agentItem = document.querySelector('.agent-item');
     var addBtnDom = document.querySelector('.add-resource');
+
     var resourceContainer = new ResourceContainer();
+    var popover = new Popover()
+      .onAdd(function() {
+        var resources = this.getResourceValue();
+        var resourcesList = toResourceList(resources, resourceContainer.remove.bind(resourceContainer));
+        resourceContainer
+          .addResources(resourcesList)
+          .render();
+      })
+      .onClose(function() {
+        agentItem.removeChild(this.dom);
+      });
 
-    var dialog = document.querySelector('.add-resource-dialog');
-    var cancelBtn = document.querySelector('.cancel');
-    var addBtn = document.querySelector('.add');
-    var resourceInput = document.querySelector('.resource-input');
 
-    addBtnDom.addEventListener('click', openAddResourceDialog);
-    cancelBtn.addEventListener('click', closeAddResourceDialog);
-    addBtn.addEventListener('click', appendResource);
+    addBtnDom.addEventListener('click', function() {
+      agentItem.appendChild(popover.dom);
+    });
 
-    function openAddResourceDialog() {
-      dialog.classList.remove('hide');
-    }
-    function closeAddResourceDialog() {
-      dialog.classList.add('hide');
-    }
-    function appendResource() {
-      var resources = getResources(resourceInput.value);
-      var resourcesObj = toResourcesObj(resources, resourceContainer.remove.bind(resourceContainer));
-      resourceContainer
-        .addResources(resourcesObj)
-        .render();
-    }
-
-    function getResources(resourceString) {
-      return resourceString.split(',');
-    }
-    function toResourcesObj(resources, deleteResource) {
+    function toResourceList(resources, deleteResource) {
       return resources.map(function(label) {
         return new Resource(label, deleteResource);
       });
@@ -41,7 +33,7 @@
   function wrap(string) {
     var fake = document.createElement('div');
     fake.innerHTML = string;
-    return fake.firstChild;
+    return fake.firstElementChild;
   }
   function appendChildren(parent, children) {
     var fragment = document.createDocumentFragment();
@@ -83,8 +75,40 @@
       return this;
     };
 
+    function Popover() {
+      this.dom = wrap(this.template);
+      this.input = this.dom.querySelector('input');
+      this.addBtn = this.dom.querySelector('.add');
+      this.cancelBtn = this.dom.querySelector('.cancel');
+    }
+    Popover.prototype.getResourceValue = function() {
+      return this.input.value.split(',');
+    };
+    Popover.prototype.onAdd = function(addHandle) {
+      var self = this;
+      this.addBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        addHandle.call(self, e);
+      });
+      return this;
+    };
+    Popover.prototype.onClose = function(closeHandle) {
+      var self = this;
+      this.cancelBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        closeHandle.call(self, e);
+      });
+      return this;
+    };
+    Popover.prototype.template = '\
+      <div class="popover">\
+        <input class="resource-input" type="text" value="aaa,bbb">\
+        <button class="btn btn-primary add" type="button">Add</button>\
+        <button class="btn btn-default cancel" type="button">Cancel</button>\
+      </div>';
+
+    window.Popover = Popover;
     window.Resource = Resource;
     window.ResourceContainer = ResourceContainer;
   })();
 })();
-
