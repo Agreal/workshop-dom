@@ -3,7 +3,7 @@
 
   function ready() {
     var addBtnDom = document.querySelector('.add-resource');
-    var resourceList = document.querySelector('.resources');
+    var resourceContainer = new ResourceContainer();
 
     var dialog = document.querySelector('.add-resource-dialog');
     var cancelBtn = document.querySelector('.cancel');
@@ -22,12 +22,10 @@
     }
     function appendResource() {
       var resources = getResources(resourceInput.value);
-      var resourcesObj = toResourcesObj(resources, deleteResourceFN);
-      appendResources(resourceList, resourcesObj);
-
-      function deleteResourceFN(e, resourceObj) {
-        resourceList.removeChild(resourceObj.dom);
-      }
+      var resourcesObj = toResourcesObj(resources, resourceContainer.remove.bind(resourceContainer));
+      resourceContainer
+        .addResources(resourcesObj)
+        .render();
     }
 
     function getResources(resourceString) {
@@ -38,19 +36,19 @@
         return new Resource(label, deleteResource);
       });
     }
-    function appendResources(parent, resources) {
-      var fragment = document.createDocumentFragment();
-      resources.forEach(function(resource) {
-        fragment.appendChild(resource.dom);
-      });
-      parent.appendChild(fragment);
-    }
   }
 
   function wrap(string) {
     var fake = document.createElement('div');
     fake.innerHTML = string;
     return fake.firstChild;
+  }
+  function appendChildren(parent, children) {
+    var fragment = document.createDocumentFragment();
+    children.forEach(function(resource) {
+      fragment.appendChild(resource.dom);
+    });
+    parent.appendChild(fragment);
   }
 
   (function() {
@@ -68,7 +66,25 @@
       }
     }
 
+    function ResourceContainer() {
+      this.dom = document.querySelector('.resources');
+      this.resources = [];
+    }
+    ResourceContainer.prototype.addResources = function(resources) {
+      this.resources = resources;
+      return this;
+    };
+    ResourceContainer.prototype.render = function() {
+      appendChildren(this.dom, this.resources)
+      return this;
+    };
+    ResourceContainer.prototype.remove = function(e, resource) {
+      this.dom.removeChild(resource.dom);
+      return this;
+    };
+
     window.Resource = Resource;
+    window.ResourceContainer = ResourceContainer;
   })();
 })();
 
