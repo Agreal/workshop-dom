@@ -13,7 +13,6 @@
     addBtnDom.addEventListener('click', openAddResourceDialog);
     cancelBtn.addEventListener('click', closeAddResourceDialog);
     addBtn.addEventListener('click', appendResource);
-    resourceList.addEventListener('click', deleteResource);
 
     function openAddResourceDialog() {
       dialog.classList.remove('hide');
@@ -23,37 +22,53 @@
     }
     function appendResource() {
       var resources = getResources(resourceInput.value);
-      var resourcesDom = toDoms(resources);
-      appendChildren(resourceList, resourcesDom);
+      var resourcesObj = toResourcesObj(resources, deleteResourceFN);
+      appendResources(resourceList, resourcesObj);
+
+      function deleteResourceFN(e, resourceObj) {
+        resourceList.removeChild(resourceObj.dom);
+      }
     }
 
     function getResources(resourceString) {
       return resourceString.split(',');
     }
-    function toDoms(resources) {
-      return resources.map(function(str) {
-        return wrap('<li class="resource-item">' + str + '<span class="delete">X</span></li> ');
+    function toResourcesObj(resources, deleteResource) {
+      return resources.map(function(label) {
+        return new Resource(label, deleteResource);
       });
     }
-    function wrap(string) {
-      var fake = document.createElement('div');
-      fake.innerHTML = string;
-      return fake.firstChild;
-    }
-    function appendChildren(parent, children) {
+    function appendResources(parent, resources) {
       var fragment = document.createDocumentFragment();
-      for (var i = 0; i < children.length; i++) {
-        fragment.appendChild(children[i]);
-      }
+      resources.forEach(function(resource) {
+        fragment.appendChild(resource.dom);
+      });
       parent.appendChild(fragment);
     }
-    function deleteResource(e) {
-      if (e.target.matches('.delete')) {
-        var resourceItem = e.target.parentNode;
-        resourceList.removeChild(resourceItem);
+  }
+
+  function wrap(string) {
+    var fake = document.createElement('div');
+    fake.innerHTML = string;
+    return fake.firstChild;
+  }
+
+  (function() {
+    function Resource(label, deleteAction) {
+      this.dom = wrap('<li class="resource-item">' + label + '<span class="delete">X</span></li> ');
+
+      var self = this;
+      var delBtn = this.dom.querySelector('.delete');
+
+      delBtn.addEventListener('click', deleteFN);
+      function deleteFN(e) {
+        e.stopPropagation();
+        delBtn.removeEventListener('click', deleteFN);
+        deleteAction(e, self);
       }
     }
 
-  }
+    window.Resource = Resource;
+  })();
 })();
 
